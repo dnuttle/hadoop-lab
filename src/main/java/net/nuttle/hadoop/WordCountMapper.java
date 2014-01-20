@@ -15,9 +15,11 @@ public class WordCountMapper extends Mapper<Object, Text, Text, IntWritable> {
   private Text word = new Text();
   
   public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+    System.out.println("Mapper.map " + value.toString() + ":" + key.toString());
     StringTokenizer itr = new StringTokenizer(value.toString());
     while (itr.hasMoreTokens()) {
       String s = (String) itr.nextToken();
+      System.out.println("Token: " + s);
       word.set(s);
       context.write(word, ONE);
     }
