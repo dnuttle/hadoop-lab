@@ -10,12 +10,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.junit.Test;
-
-import net.nuttle.hadoop.WordCountMapper;
-import net.nuttle.hadoop.WordCountReducer;
 
 import static org.junit.Assert.assertTrue;
 
@@ -32,7 +29,7 @@ public class LocalMapReduceTest {
     Configuration conf = new Configuration();
     conf.set("mapred.job.tracker", "local");
     conf.set("fs.default.name", "file:///");
-    conf.set("key.value.separator.in.input.line", "|");
+    //conf.set("key.value.separator.in.input.line", "|");
     FileSystem fs = FileSystem.get(conf);
     if (fs.exists(outputPath)) {
       fs.delete(outputPath, true);
@@ -48,7 +45,8 @@ public class LocalMapReduceTest {
     file = fs.create(new Path(inputPath, "part-1"));
     file.writeBytes("abc def\nghi jkl");
     file.close();
-    Job job = runJob(conf, inputPath, outputPath, KeyValueTextInputFormat.class);
+    Job job = runJob(conf, inputPath, outputPath, TextInputFormat.class);
+    //Job job = runJobNoReducer(conf, inputPath, outputPath, KeyValueTextInputFormat.class);
     assertTrue(job.isSuccessful());
     //List<String> lines = IOUtils.readLines(fs.open(new Path(outputPath, "part-r-00000")));
     
@@ -70,6 +68,23 @@ public class LocalMapReduceTest {
     
 
     FileInputFormat.setInputPaths(job, inputPath);
+    FileOutputFormat.setOutputPath(job, outputPath);
+    job.waitForCompletion(false);
+    return job;
+  }
+  
+  public Job runJobNoReducer(Configuration conf, Path inputPath, Path outputPath, 
+    Class<? extends InputFormat> inputFormat)
+    throws Exception {
+    Job job = new Job(conf);
+    job.setJarByClass(WordCountMapper.class);
+    job.setInputFormatClass(inputFormat);
+    
+    job.setMapperClass(WordCountMapper.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    
+    FileInputFormat.setInputPaths(job,  inputPath);
     FileOutputFormat.setOutputPath(job, outputPath);
     job.waitForCompletion(false);
     return job;
