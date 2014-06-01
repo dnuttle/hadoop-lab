@@ -27,6 +27,7 @@ public class SequenceFileUtil {
    */
   public static void writeSequenceFile(FileSystem fs, Configuration conf, Path name, Map<String, Integer> values) 
       throws IOException {
+      @SuppressWarnings("deprecation")
       SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, name, Text.class, IntWritable.class);
       for (String key : values.keySet()) {
         Text inKey = new Text(key);
