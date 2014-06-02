@@ -77,7 +77,6 @@ public final class SequenceFilesReader {
    * @param <K>
    * @param <V>
    * 
-   * @author Adobe Systems Inc
    */
   public interface Handler<K extends Writable, V extends Writable> {
 
